@@ -1,0 +1,240 @@
+2005-04-12 -- 2.50
+* (nberry) more code fixes and clean up.
+
+	   displayImage() (resizes images otf) runs a little faster...
+	   *note: change displayImage() and showImage() into a single class.
+
+	   added slideshow capability based on session_id's last query
+
+	   fixed email-import.php to read in config.inc values.
+
+	   added a favicon.ico  :)
+
+	   added code for quick theme changing (also allows users to change
+	   theme without having to login).
+
+	   changed image/view.php to popup in a new window, makes for quicker browsing
+
+	   adjusted popup window attributes based on "init disp" setting in user prefs
+
+	   added parentPath to image/view.php and made links update window.opener.location
+
+	   w3c certified the CSS themes
+
+2005-03-01 -- 2.41
+* (nberry) several fixes... register_globals is still required, but at least the
+	   code is going in the direction of phasing that out.
+
+	   install.php (formerly setup.php) will automatically be shown if
+	   no config.inc is found.  Improved the install process in install.php
+
+	   Re-enabled search conditions pop-up.  Will probably make this configurable
+	   via config.inc.
+
+2005-02-16 -- 2.40
+* (nberry) major overhaul.  from what I can tell, everything works as it should
+
+2005-02-15 -- 2.37
+* (nberry) register_globals is no longer required!
+
+* (nberry) finished formatting the include files
+
+2005-02-14 -- 2.36
+* (nberry) cleaned up setup.php (will probably make this command-line next release)
+
+* (nberry) started the laborious task of putting single quotes around
+	   <a href... , <input type=... , etc.
+
+* (nberry) cleaned up *all* hard references to candid.scurvy.net
+
+* (nberry) hella formatting fixes
+
+
+2005-02-02 -- 2.34
+* (nberry) setup initial web-based configurator and function validator.
+
+2005-01-07 -- 2.32
+* (nberry) cleaned up a ton of old code
+
+* (nberry) fixed border/shadow effect in default theme.
+
+* (nberry) added [edit] link in parentPath
+
+* (nberry) fixed massEdit problem for users under access level 5 (woohoo!)
+
+2004-12-30 -- 2.30
+* (nberry) retired htmltop(), htmltop2(), htmlbottom() and htmlbottom2()
+	   to css_top() & css_end().
+
+	   This new template allows for CSS-driven design/layout. YESSS!!!!!
+
+2004-11-15 -- 2.22
+* (nberry) changed browse behavior so only to show browseCat()
+	   when offset is not set (better for browsing)
+
+* (nberry) cleaned up editImage look to conform to new colors
+
+* (nberry) cleaned up person_add.php to check for existing
+	   'fname lname'.
+
+2004-11-11 -- 2.21
+* (nberry) added last_comments.php to show the logged in user's
+	   last 5 commented images with 5 of their corresponding
+	   comments.
+
+2004-09-28 -- 2.20
+* (nberry) added user_mms which allows users to auto-upload pictures
+	   into a pre-defined category via MMS from their cell phone.
+
+2004-09-23 -- 2.18
+* (nberry) created new function, getCategoryList2(), to generate a
+	   tree-view of the categories.  Already integrated with
+	   adding images (instead of scrolling through that long list)
+	   and will probably integrate for a "lite" view of candid
+	   in browseCat().
+
+2004-09-21 -- 2.17
+* (nberry) added filename field (from original CANDID)
+
+* (nberry) added header Content-Disposition to replace the filename
+	   when downloading images (instead of saving as main.php.jpg)
+	   and will use the image ID if no filename is found
+
+* (nberry) cleaned up browseImage() look.
+
+* (nberry) if descr in image_info is empty, image_view.php will show
+	   the html title as 'Image ID: XXX' (not very exciting, but
+	   at least it's better than "")
+
+2004-04-29 -- 2.16
+* (bweir)  added image_category for images to be assigned in multiple categories
+
+* (nberry) added .tar.gz (.tgz) and .tar support
+
+* (nberry) fixed compressed file uploads, now directory structure is kept (because of tar's
+	   behavior) which fixed a filename issue with zips (ie. same filename used in different
+	   directories in a zip, one would win).
+
+2004-04-21 -- 2.14
+* (nberry) added PNG support
+
+* (nberry) more re-design work
+
+* (nberry) added last added/viewed & random image for a "splash" page
+
+* (nberry) improved thumbnail creation and sped up importImage function
+
+2004-04-14 -- 2.13
+* (nberry) added the ability to post comments (while logged in of course)
+
+* (nberry) removed the dependency of cat_id being set while viewing an image to 
+	   build parentPath()
+
+* (nberry) added persistent cookie option under user preferences (almost
+	   persistent, 2 years and 2 months) or to expire cookie when browser
+	   is closed
+
+* (nberry) added width/height fields in image_info table so the image isn't
+	   read twice (first time to get the dimensions, second to display the
+	   image) and has sped up viewImage() slightly
+
+2004-04-10 -- 2.12
+* (nberry) cleaned up the page links generated when browsing (Page 1 2 3 etc),
+	   looks quite a bit better.. followed Yahoo!/AV style. adjusted some
+	   formatting issues with the browse function
+
+2004-04-03 -- 2.11
+* (nberry) fixed the layout issues with CSS (IE's ability to allow bad CSS
+	   sucks!) and made the category image linked to browse the category
+
+2004-04-03 -- 2.10
+* (nberry) improved the "mass edit" feature to check each image for the same
+	   values.  example: all images are in the same category, acknowledge
+	   that and auto-select the option for that category.  The "checkboxes"
+	   next to the fields will be left in as an extra precaution for the
+	   user
+
+* (nberry) added the additional check when adding people to an image so
+	   duplicates do not arise (it's focused on the image_id and the
+	   user_id)
+
+2004-04-02 -- 2.09
+* (nberry) changed the layout for browsing categories and added the menu on the
+	   side as a floating css element.. I don't know if I like it, we'll see
+	   after I sleep on it. feel free to make suggestions
+
+2004-03-31 -- 2.08
+* (nberry) added the ability to assign thumbnails to categories.  I need to
+	   clean up the look and feel, but the capability is there either under
+	   an editImage (which will update its parent category) or under
+	   editCategory where you can enter in the image_id of an existing image
+	   or upload a new one
+
+2004-03-31 -- 2.07
+* (nberry) changed viewImage function to display images at a user-defined size
+	   with choices between 640x480,800x600,1024x768.  Default is 640x480
+	   which also applies to all guest users
+
+2004-03-18 -- 2.06
+* (nberry) changed viewImage function to display images at 640x480 initially
+	   which allows quicker viewing of images, and still keeps the image in
+	   its original size (which can be viewed by clicking on the image).
+	   This will soon be a user configurable option under the prefs section
+
+2004-01-17 -- 2.05
+* (nberry) added last/next image links when viewing an image in a particular
+	   category or from search results (only works for logged in users)
+
+* (nberry) cleaned up add/edit admin menus
+
+* (nberry) changed <TITLE> to show the category name being viewed and if images
+	   are shown, then also include a page indicator,
+	   ie. "CANDID v2 | My Road Trip - Page 3"
+
+2003-10-19 -- 2.04
+* (nberry) added html anchors for after editing images, the page will refresh
+	   back to the place of the image that was editted (my numrow & numcol
+	   count shows several images, so I'm hoping other quasi-lazy people
+	   like me will appreciate this)
+
+* (nberry) added shade border around image on main page
+
+2003-10-04 -- 2.03
+* (nberry) improved mass-edit feature to only update fields that have been
+	   checked
+
+* (nberry) shows thumbnails of all images in mass-edit mode
+
+2003-10-02 -- 2.02
+* (nberry) ability to change the update notice (marking categories red that
+	   have been updated in either a day, week or month)
+
+2003-09-29 -- 2.01
+* (nberry) ability to adjust name order ("last, first" or "first last")
+
+2003-09-21 -- 2.00
+* (nberry) re-written from scratch in PHP
+
+* (nberry) speed improved up to 4x
+
+* (nberry) image data resides within the database for improved security
+
+* (nberry) "mass-edit" feature to perform the same change to several pictures
+	   at once
+
+* (nberry) "mass-import" feature to set the same options at once (including
+	   image rotation)
+
+* (nberry) auto-refresh to previous page (e.g. after editing an image, refresh
+	   back to the page you were at before editing)
+
+* (nberry) improved search ability (combined "Alternate search" and "Search"
+	   from the original CANDID to allow sorting of the results based on
+	   other search criteria
+
+* (nberry) images can be assigned to categories with sub-categories
+
+* (nberry) uploaded images are now sorted by the date they were uploaded
+
+* (nberry) zip files and individual JPEGs can be uploaded (tar and tar/gz soon
+	   to be added)

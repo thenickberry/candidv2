@@ -1,0 +1,75 @@
+<html>
+
+<head>
+<style>
+   BODY {background-color: white; font-size: 10pt; font-family: verdana,helvetica}
+</style>
+
+<script>
+</script>
+</head>
+
+
+<body bgcolor=white>
+
+
+<h4>Showing checkboxes in a JavaScript tree</h4>
+
+The layout used for this demo is just one of many possible combinations of Treeview settings. If your site requires a different look-and-feel, check some of the things you can change:
+<ul>
+<li>Use one frameless page
+<li>Link the items to pages.
+<li>Display folder and document icons.
+<li>Activate highlight of last selection.
+<li>See the other demos in this site for more.
+</ul>
+<p>
+
+Make your selection on the left frame and then press the Get Values button at the bottom. The selected options are shown in this frame. Notice that the Hour group in the tree contains radio buttons; only one can be pressed at a time.
+<p>
+<script>
+	//This code is used to read the querystring sent by the left frame
+	var d="";
+	var queryStr = window.location.search.substr(1);
+	var i, splitArray;
+	var BOX1, BOX2, BOX3, RD1, RD2, RD3
+
+	queryStr=unescape(queryStr)
+	queryStr=queryStr.replace("+"," ").replace("+"," ")
+	if (queryStr.length != 0) {
+		splitArray = queryStr.split("&")
+		for (i=0; i<splitArray.length; i++) {
+			eval(splitArray[i])
+		}
+	}
+</script>
+
+Days selected:<b> 
+
+<script>
+if (BOX1)
+	document.write ("Monday ")
+if (BOX2)
+	document.write ("Wednesday ")
+if (BOX3)
+	document.write ("Friday ")
+</script>
+</b><br>	
+
+Time selected:<b>
+
+<script>
+if (RD1)
+	document.write ("10AM ")
+if (RD2)
+	document.write ("2PM ")
+if (RD3)
+	document.write ("6PM ")
+</script>
+
+</b><BR><BR>
+Instructions about how to configure a Treeview script to show checkboxes are provided in the source files <I>demoCheckbox*.*</I> available with the free download.
+<p>
+<span style="font-size:8pt">Note: This demo runs on IE4+, Mozilla 0.9+, and NS6+. The old NS4.* handles all the other Treeview demos, but does not support the dynamic creation of form elements used by this checkbox tree. The new Opera7 also runs correctly all configurations of the regular Treeview but has one problem with the checkbox demo: it cannot query form elements that are not visible (closed branches.) </span><p>
+</body>
+</html>

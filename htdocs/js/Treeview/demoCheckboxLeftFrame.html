@@ -1,0 +1,77 @@
+<!--
+     (Please keep all copyright notices.)
+     This frameset document includes the Treeview script.
+     Script found at: http://www.treeview.net
+     Author: Marcelino Alves Martins
+
+	 See demoFramesetLeftFrame.html for instructions specific to the left frame
+-->
+
+
+<html>
+
+<head>
+
+<style>
+   BODY {background-color: white}
+   TD {font-size: 10pt; 
+       font-family: verdana,helvetica; 
+	   text-decoration: none;
+	   white-space:nowrap;}
+   A  {text-decoration: none;
+       color: black}
+</style>
+
+<script src="ua.js"></script>
+<script src="ftiens4.js"></script>
+<script src="demoCheckboxNodes.js"></script>
+
+<script>
+// This function depends on the actual prependHTML strings used in the
+// configuration file (dmeoChackboxNodes.js). If you change that, you will
+// have to change this
+function generateQueryString() {
+	var retStr
+	//getElById is defined in ftiens4.js and help with cross-browser compatibility
+	retStr = "BOX1=" + getElById('BOX1').checked
+	retStr = retStr + "&BOX2=" + getElById('BOX2').checked
+	retStr = retStr + "&BOX3=" + getElById('BOX3').checked
+	retStr = retStr + "&RD1=" + getElById('RD1').checked
+	retStr = retStr + "&RD2=" + getElById('RD2').checked
+	retStr = retStr + "&RD3=" + getElById('RD3').checked
+
+	return retStr;
+}
+// If you are not using a frameset layout, this function will have to 
+// change from reloading the right frame to reloading the self window
+function submitTreeForm() {
+	window.open("demoCheckboxRightFrame.html?" + generateQueryString(), "basefrm")
+}
+</script>
+
+<title>Checkbox Tree JavasScript</title>
+</head>
+
+<body topmargin=16 marginheight=16>
+
+<!-- Corporate users or any others that want to remove the next link should check 
+	 the online FAQ for instructions on how to obtain a version without the link -->
+<!-- Removing this link will make the script stop from working -->
+<div style="position:absolute; top:0; left:0; "><table border=0><tr><td><font size=-2><a style="font-size:7pt;text-decoration:none;color:silver" href="http://www.treemenu.net/" target=_blank>Javascript Tree Menu</a></font></td></tr></table></div>
+
+<!-- The form-related tags in this file are only needed for to demonstrate checkbox 
+     functionality. If your site will not display checkboxes, picka a different configuration file.
+-->
+<form name=ft method="">
+<!-- Build the browser's objects and display default view of the 
+     tree. -->
+<script>initializeDocument()</script>
+
+<noscript>
+A tree for site navigation will open here if you enable JavaScript in your browser.
+</noscript>
+
+<BR><BR>
+<CENTER><input type=button onClick="submitTreeForm()" value="Get Values"></CENTER>
+</form>
+</html>

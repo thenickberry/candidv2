@@ -1,0 +1,32 @@
+<html>
+
+<head>
+<style>
+   BODY {background-color: white; font-size: 10pt; font-family: verdana,helvetica}
+</style>
+</head>
+
+
+<body bgcolor=white>
+
+<script>
+//This code is only needed for the demo, not for your site
+var d=""
+var queryStr = window.location.search.substr(1)
+queryStr=unescape(queryStr)
+queryStr=queryStr.replace("+"," ").replace("+"," ")
+if (queryStr.length != 0)
+	document.write("Date clicked: " + queryStr + "<br><br>");
+</script>
+
+<h4>Thousands-of-nodes Example</h4>
+
+<B>See how fast it is to build a large tree</B><p>
+Transfering the files to the browser on a slow connection may still take some unavoidable seconds because the definition of this large tree requires a configuration file of 11KB. However, after the internet transfer, creating the actual tree on the browser, setting it up, and displaying it doesn't take much longer than with the smallest of the trees.<p>
+
+Folders for years and folders for months do not load pages themselves and, thus, cannot be highlighted. All days can be highlighted with the exception of Feb 1, 2000. The exclusion of highlight for one node shows the flexibility of the highlight settings in Treeview.<p>
+
+A tree with years, months, and days is a rather ficticious example; there are obviously better ways to pick a date. Real world examples of very large trees include presenting data from a database or displaying the structure of a file system.<p>
+
+</body>
+</html>
