@@ -1,0 +1,6 @@
+Originally written by Ben Weir in PERL, CANDIDv2 is
+an updated PHP-based interface for managing images
+searchable by date taken, photographer, description,
+and people in image.  Images are categorized for a
+hierarchical browsing.  Users can also upload via
+email.
