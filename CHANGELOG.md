@@ -1,0 +1,397 @@
+# Changelog
+
+All notable changes to CANDIDv2 are documented in this file.
+
+## 2026-02-17
+
+### Changed
+- Switched from MySQL to MariaDB
+  - Updated docker-compose.yml to use mariadb:11 image
+  - Drop-in replacement, no code changes required
+  - Fully open source, better performance
+- Switched from Apache to Nginx + PHP-FPM
+  - Updated Dockerfile to use php:8.3-fpm
+  - Added nginx service to docker-compose.yml
+  - Created docker/nginx.conf with rewrite rules, security headers, gzip compression
+  - Better resource efficiency and concurrent connection handling
+  - Industry standard for production PHP deployments
+
+### Added
+- Inline image edit modal
+  - Hover over image cards to see edit icon (pencil)
+  - Click to open modal with same fields as full edit page
+  - Works on home, browse, and search results pages
+  - Changes save via AJAX without page reload
+  - Caption updates instantly after save
+
+### Changed
+- Moved CSS from inline `<style>` block to external file `public/assets/css/app.css`
+  - Enables browser caching
+  - Cleaner separation of concerns
+- Switched from Nginx to Caddy web server
+  - Simpler configuration (Caddyfile vs nginx.conf)
+  - Automatic HTTPS support (when deployed with domain)
+  - Same security headers and caching behavior
+- Bulk edit form buttons now match image edit form layout
+  - Save/Cancel on left, Delete on right in same row
+  - Removed horizontal rule separator
+- Bulk action bar buttons are now centered
+
+### Fixed
+- Search results now exclude soft-deleted images
+  - Added deleted_at IS NULL filter to search query
+  - Fixed categories, photographers, and tagged people dropdowns to exclude deleted items
+- Error pages (404, 403, 500) now render within main layout
+  - Fixed nested HTML document issue
+- Fixed E2E logout test to check for logout link absence instead of dropdown visibility
+- Caption truncation and consistent card heights in search results and browse views
+
+## 2026-02-16
+
+### Changed
+- date_taken column now stores full datetime (was DATE, now DATETIME)
+  - EXIF DateTimeOriginal now stored as 'Y-m-d H:i:s' instead of just 'Y-m-d'
+  - Created migration 005_date_taken_datetime.sql
+  - Created scripts/backfill_date_times.php to update existing images
+  - Updated database/schema.sql to reflect DATETIME type
+- Migrated all image processing from GD/native ImageMagick to Intervention Image v3
+  - Cleaner, more maintainable code with consistent API
+  - Automatic EXIF orientation handling (no custom code needed)
+  - Native HEIC support via Imagick driver
+  - Updated composer.json: removed ext-gd, added intervention/image ^3.0
+  - Updated Dockerfile: removed GD extension, kept imagick for Intervention's Imagick driver
+  - Refactored ImageController: new imageManager() and createThumbnail() methods using Intervention
+  - Updated scripts/regenerate_thumbnails.php to use Intervention Image
+- Removed query limits on browse and search pages
+  - Browse category view: removed LIMIT 50 (shows all images)
+  - Search results: removed LIMIT 100 (shows all results)
+- Homepage now shows 15 recent images (was 12)
+- Homepage excludes soft-deleted images
+
+### Added
+- Native lazy loading for images (`loading="lazy"` attribute)
+  - Applied to browse/category.php, search/results.php, and image/bulk-edit.php
+  - Improves initial page load by deferring off-screen images
+- Expandable details in flash messages for upload feedback
+  - Shows which files were skipped as duplicates
+  - Shows which files failed to upload with error reasons
+  - Collapsible details section to keep UI clean
+
+### Fixed
+- Bulk action bar buttons now have consistent sizing (converted anchors to buttons)
+- Shortened bulk action button labels ("Edit Selected" → "Edit", "Rotate Selected" → "Rotate")
+- Fixed bug where purging a duplicate image would delete files still referenced by other images
+  - ImageService::hardDelete() now checks for other records using the same file_path/thumb_path before deleting files
+- Improved button hierarchy per Elastic UI guidelines
+  - Bulk "Edit" button changed from primary to secondary (only one primary action per context)
+  - Empty category state now shows centered Upload CTA instead of plain text
+- Replaced all JavaScript alerts and confirms with styled modal dialogs
+  - Created reusable modal system (public/assets/js/modal.js)
+  - Added modal CSS to main layout
+  - Supports alert, confirm, and danger confirm variants
+  - Uses data-confirm attributes for declarative usage on forms/buttons
+  - Updated: browse/category, search/results, image/edit, image/bulk-edit, image/view, admin/users, admin/trash
+- Improved upload progress indicator
+  - Added shimmer animation for processing state after upload completes
+  - Shows descriptive text ("Processing images...") during thumbnail generation
+  - Spinner icon during processing phase
+- Improved bulk action UI
+  - Replaced "Select" text button with grid+checkmark icon
+  - Replaced "Done" button with X icon on right side of actions bar
+  - Header buttons (Upload, Select) hidden when category has no images
+- Removed unused numrows/numcols fields from user profile
+  - Removed form fields from templates/profile/edit.php
+  - Removed from ProfileController and ProfileService update methods
+- Search "People Tagged" filter now uses AND logic
+  - When multiple people are selected, only images containing ALL selected people are returned
+  - Previously used OR logic (any of the selected people)
+- Search result cards now display category name and date
+  - Category link in bottom left, date in bottom right
+  - Uses flexbox layout for clean alignment
+- Upload no longer defaults description to filename
+  - Added "Use filename as description" checkbox (opt-in)
+  - Prevents nonsense descriptions like "IMG 1234" or UUID strings
+  - Created scripts/cleanup_descriptions.php to clear existing programmatic descriptions
+  - Cleared 228 programmatic descriptions (IMG ####, UUID-like strings)
+  - Removed "Untitled" fallback text - empty descriptions now display as blank
+
+## 2026-02-15
+
+### Added
+- Bulk image editing feature
+  - "Select" toggle button in category browse and search results to enter selection mode
+  - Checkboxes appear on image cards only when selection mode is active
+  - Bulk actions bar shows when in selection mode with count and action buttons
+  - "Done" button exits selection mode and clears selections
+  - Edit Selected button opens bulk edit page with all selected images
+  - Bulk edit form supports: description, date taken, category, photographer, access level, private flag, add/remove people tags
+  - Bulk rotate button rotates all selected images clockwise
+  - Only owner or admin can select/edit images
+  - Added routes: GET/POST /image/bulk/edit, POST /image/bulk/rotate
+  - Added CSS for image selection checkboxes and bulk actions bar
+  - Added 4 E2E tests for bulk edit functionality (total: 31 E2E tests)
+- Image rotation on edit page
+  - Single rotate button (clockwise) below image preview
+  - Updates both full image and thumbnail
+  - Updates width/height and MD5 hash in database
+- Soft-delete functionality for categories and images
+  - Categories and images are marked as deleted instead of being permanently removed
+  - Deleted items are hidden from all browse/search views
+  - New admin Trash page to view, restore, or permanently delete items
+  - Bulk restore and delete actions available in Trash
+  - Created ImageService for image management operations
+  - Updated CategoryService with softDelete(), restore(), hardDelete(), getDeleted() methods
+  - Added deleted_at and deleted_by columns via migration 003_add_soft_delete.sql
+  - Routes: /admin/trash, /admin/trash/empty, /admin/trash/{type}/{id}/restore, /admin/trash/{type}/{id}/purge, /admin/trash/bulk
+  - Trash link added to admin navigation
+  - Unit tests for ImageService and updated CategoryService tests
+- Category delete confirmation modal
+  - Shows count of subcategories and images that will be affected
+  - Replaces browser alert with styled modal dialog
+  - Added getDeletionStats() method to CategoryService
+  - Added /category/{id}/deletion-stats JSON endpoint
+- Profile dropdown menu in navigation
+  - Profile icon (person silhouette) with hover dropdown
+  - Contains Profile and Logout links
+  - Admin section with Users and Trash links (admin only)
+  - Login/Register links for logged-out users
+- Upload progress indicator
+  - Progress bar with percentage during file upload
+  - Visual feedback while files are being processed
+- Inline category creation on upload page
+  - "New" button next to category dropdown
+  - Modal to create category without leaving page
+  - New category automatically selected after creation
+  - Added POST /category/add-json endpoint
+
+### Changed
+- Image view and edit pages now display content in two-column layout
+  - Image on left, details/form on right
+  - CSS Grid layout with responsive breakpoint at 900px
+  - Edit page shows full-size image with rotate button
+- Thumbnail settings now configurable via environment variables
+  - Added `thumb_width`, `thumb_height`, `thumb_quality` to config/config.php
+  - Environment variables: `THUMB_WIDTH`, `THUMB_HEIGHT`, `THUMB_QUALITY`
+  - Defaults: 400x400 at 100% quality
+  - ImageController uses config values instead of hardcoded dimensions
+  - regenerate_thumbnails.php script also uses config values
+  - Added `config()` helper method to base Controller class
+- Increased upload limits in PHP configuration
+  - max_file_uploads: 20 → 100
+  - post_max_size: 55M → 500M
+- Updated minimum PHP version from 8.2 to 8.3 (8.2 EOL was Dec 2025)
+  - Updated composer.json, Dockerfile, CI workflow, README
+  - CI now tests PHP 8.3 and 8.4
+- Browse image counts now include subcategories
+  - Added `countImagesRecursive()` and `getDescendantIds()` to CategoryService
+  - Added `categoryService()` to Container and Controller
+  - Updated BrowseController to use CategoryService
+  - Templates show `total_image_count` for categories
+
+### Fixed
+- Database schema cleanup - removed unused tables and fields
+  - Removed tables: user_pics, user_mms, category_pics
+  - Removed user fields: debug, expire, update_notice
+  - Removed category field: loc
+  - Removed image_info field: timestamp
+  - Removed session fields: last_query, ip
+  - Created migration 004_remove_unused_fields.sql
+  - Updated Auth.php, ProfileService.php, CommentService.php to remove references
+- Thumbnail generation now respects EXIF orientation
+  - Added applyExifOrientation() helper to ImageController
+  - JPEGs with EXIF orientation data (e.g., photos from phones) now generate correctly-rotated thumbnails
+  - Also fixed regenerate_thumbnails.php script to apply EXIF orientation
+- View count only increments once per session per image (prevents inflation from same client)
+- "Sort by" label on /browse no longer wraps on narrow screens
+- Increased lightbox info font sizes (caption: 1rem → 1.25rem, metadata: 0.8rem → 1rem)
+- Image view Edit icon now uses pencil icon, positioned top-right of Details card header
+
+### Added
+- PHPStan static analysis (level 6)
+  - Added phpstan/phpstan to composer.json
+  - Created phpstan.neon configuration
+  - Fixed 4 PHPStan errors (unreachable code, unnecessary null coalesce, unused property)
+  - Added to CI workflow
+- Additional integration tests
+  - AuthServiceTest: login, logout, password hashing, admin checks
+  - UserServiceTest: CRUD operations with real database
+  - ImageStorageTest: filesystem operations with real temp directory
+  - Total test count: 79 tests with 123 assertions
+- Playwright E2E testing infrastructure
+  - Created package.json with Playwright dependency
+  - Created playwright.config.ts with multi-browser support
+  - E2E tests for authentication (login, logout, registration redirect)
+  - E2E tests for browsing (categories, lightbox)
+  - E2E tests for search functionality
+  - E2E tests for image upload and edit (when authenticated)
+  - Added E2E job to CI workflow
+- Action icons on admin/users page (edit pencil, delete trash)
+  - Added `.action-icon` and `.action-icon-danger` CSS classes
+
+### Changed
+- Updated CLAUDE.md to require running PHPStan after PHP changes
+- Added phpstan.neon and composer.lock to docker-compose.yml volumes
+
+## 2026-02-14
+
+### Added
+- Standardized button styling and layout across all templates
+  - Added missing `.btn` class to 12 submit buttons
+  - Fixed Delete Category button missing `.btn` base class
+  - Changed Edit button on image view from secondary to primary
+  - Shortened button text to action words (Save, Cancel, Create, Delete)
+  - Consistent button layout: Save/Cancel left, Delete right using `.btn-group`
+  - Delete buttons use red text with clear background (`.btn-text-danger`)
+  - Updated 7 templates: image/edit, category/edit, category/add, profile/edit, profile/password, admin/user-edit, admin/user-create
+- Added sorting options for category image view
+  - Sort by Date Taken (default), Date Added, or Description
+  - Dropdown auto-submits on change
+  - Default sort order configurable per category via edit page
+  - Uses category's sort_by field as default when no query param specified
+- Improved navigation after image edit/delete
+  - Returns to category view if user came from a category
+  - Pass return_category through edit form as hidden field
+- Added image deletion functionality
+  - Delete button on image edit page with confirmation dialog
+  - Removes image files from filesystem and all database records
+  - Only available to image owner or admin
+- Added duplicate detection during image upload
+  - Computes MD5 hash of uploaded images
+  - Skips duplicates within the same category
+  - Stores md5_hash in image_info for future checks
+  - Reports skipped duplicates in flash message
+  - Created scripts/backfill_md5_hashes.php for existing images
+- Added Upload button to category view page
+  - Links to /image/add?category={id} with category pre-selected
+  - Only visible to logged-in users
+- Added "People Tagged" filter to image search
+  - Multi-select dropdown shows users who are tagged in at least one image
+  - Search results filter by any of the selected people (OR logic)
+- Added people tagging UI on image edit page
+  - Multi-select dropdown to tag users in images
+  - Tagged people now link to their profile pages in image view
+  - Uses existing `people` table from database schema
+- Added user management navigation links to header
+  - Admin link (visible to admins only) to access /admin/users
+  - Profile link (username links to user's profile page)
+  - Logout moved to separate link
+- Moved category edit button to SVG pencil icon in breadcrumb (only visible with edit permissions)
+- Enhanced lightbox with metadata display and action links
+  - Shows date taken, photographer, and camera model in footer
+  - "Details" link to view full image page
+  - "Edit" link (only visible when user has permission)
+  - Added data attributes to image cards across all templates
+  - Updated controllers to include owner, camera, and permission data
+  - Responsive mobile layout with icon-only actions
+- Implemented bulk image upload with auto-populated metadata
+  - Multiple file selection in upload form
+  - Description defaults to filename (underscores/dashes converted to spaces)
+  - Date taken extracted from EXIF DateTimeOriginal
+  - Camera model extracted from EXIF
+  - Per-file error handling with summary message
+  - Redirects to category or home after multi-upload
+- Added Feature 1: Image Lightbox with Carousel
+  - Created public/assets/js/lightbox.js (vanilla JS, no dependencies)
+  - Click any thumbnail in image grids to open lightbox overlay
+  - Left/right arrows and keyboard navigation (arrow keys, Escape)
+  - Touch swipe support for mobile devices
+  - Preloads adjacent images for smooth navigation
+  - URL hash updates for shareable direct links (#image-123)
+  - Works on home page, browse categories, search results, and profile pages
+- Completed Phase 8: Framework Evaluation
+  - Evaluated Slim 4, Flight, and frameworkless approaches
+  - Created FRAMEWORK_EVALUATION.md with detailed comparison
+  - Recommendation: Continue frameworkless — migration cost exceeds benefit
+- Added breadcrumb navigation to image view page
+  - Updated ImageController::detail() to build category breadcrumb
+  - Added breadcrumb display to templates/image/view.php
+- Added category add/edit UI links to browse templates
+  - Updated BrowseController to pass canEdit and canAddCategory flags
+  - Added "Add Category" button to browse/index.php
+  - Added "Add Category" and "Edit Category" buttons to browse/category.php
+- Completed Phase 7: Testing Infrastructure
+  - phpunit.xml configuration with unit and integration test suites
+  - tests/bootstrap.php for test environment setup
+  - Unit tests: HelperFunctionsTest, ImageStorageTest, UserServiceTest, CategoryServiceTest
+  - Integration tests: DatabaseTest
+  - GitHub Actions CI workflow (.github/workflows/tests.yml)
+  - Matrix testing for PHP 8.2 and 8.3 with MySQL 8.0
+  - Updated README.md with testing instructions
+- Completed Phase 6: CSS Consolidation & Responsive Design
+  - CSS with custom properties for theming (--primary, --gray-*, --red-500, etc.)
+  - Utility classes: .text-center, .mb-1, .mb-2, .mt-2, .ml-1, .ml-2, .my-2
+  - Layout classes: .grid-2, .flex-between, .flex-center, .inline, .float-right
+  - Card sizing: .card-sm, .card-md, .card-lg, .card-center
+  - Table styling: .table with proper borders and padding
+  - Button variants: .btn-secondary, .btn-danger, .btn-link, .btn-link-danger
+  - Responsive breakpoints at 768px and 480px
+  - .hide-mobile class for mobile-specific layouts
+  - Converted all inline styles to CSS classes across all templates
+- Added image edit functionality (showEdit, edit methods, /image/{id}/edit route)
+- Completed Phase 5: Dependency Reduction (new code uses native HTML5 date inputs, no JS dependencies)
+- Completed Phase 4b: Invite-Only Registration
+  - Disabled public registration (redirects with message)
+  - Added must_change_password column to user table
+  - Created AdminController for user management
+  - Created UserService
+  - Added forced password change redirect in requireAuth()
+- Completed Phase 4a: Filesystem-Based Image Storage
+  - Created ImageStorage.php with hash-based sharding
+  - Updated ImageController to store new images on filesystem
+  - Added file_path and thumb_path columns to image_info
+  - Created migration script for existing BLOB images
+  - Backward compatible: serves from filesystem or falls back to BLOB
+- Completed Phase 3e: Dead Code Cleanup (all legacy code already in legacy/ folder, no issues in new code)
+- Completed Phase 3d: PHP Language Modernization
+  - Created exception hierarchy: HttpException, ForbiddenException
+  - Replaced all exit() calls with proper exceptions
+  - Router catches HttpException and renders appropriate error pages
+  - Added 500 error template
+  - All legacy PHP patterns already absent from new src/ code
+- Fixed route ordering in public/index.php (specific routes must come before parameterized routes)
+- Renamed ImageController::view() to detail() to avoid conflict with parent Controller::view()
+- Completed Phase 3c: Security Fixes
+  - CSRF: csrf_token(), csrf_field(), verify_csrf() in functions.php; validateCsrf() in all POST controllers
+  - XSS: h() helper used in all templates for user-supplied output
+  - File uploads: finfo magic byte detection + filename sanitization in ImageController
+  - Open redirects: redirect() validates same-host for absolute URLs
+  - No system()/shell_exec() calls in src/; import.inc remains in legacy/
+- Completed Phase 3b: Replace mysql_* with PDO (already done via Phase 3a restructuring)
+  - Database.php uses PDO with prepared statements
+  - Auth.php uses password_hash()/password_verify() with bcrypt
+  - No legacy patterns (mysql_*, split(), addslashes()) in new src/ code
+- Created MODERNIZATION_PLAN.md with comprehensive assessment findings
+- Added Phase 3a: Code Restructuring to PHASES.md (modern directory layout, PSR-4 autoloading, Controller/Service/Repository pattern)
+- Completed Phase 3a: Code Restructuring
+  - New directory structure: public/, src/, config/, templates/, storage/
+  - composer.json with PSR-4 autoloading (App\ namespace)
+  - Front controller with Router (public/index.php)
+  - Container class for dependency injection
+  - Core services: Database (PDO), Auth (sessions/bcrypt), Template
+  - Additional services: CategoryService, CommentService, ProfileService, HistoryService
+  - Controllers: HomeController, AuthController, BrowseController, ImageController, SearchController, CategoryController, CommentController, ProfileController
+  - Helper functions: h(), csrf_token(), csrf_field(), redirect(), flash(), config()
+  - Templates with layout system (layouts/main.php)
+  - Templates for all views: home, auth, browse, image, search, category, profile, comments
+  - public/.htaccess for Apache rewriting
+  - Moved legacy htdocs/, includes/, config.inc to legacy/
+  - Fixed ProfileController::view() → show() method naming conflict with parent Controller
+- Completed Phase 2: Documentation & Build
+  - Dockerfile (PHP 8.2 + Apache with GD, PDO_MySQL, EXIF, zip)
+  - docker-compose.yml (PHP+Apache and MySQL 8.0 services)
+  - docker/php.ini (upload limits, error reporting, session security)
+  - .env.example (environment configuration template)
+  - .gitignore (env files, storage, IDE, Docker, vendor)
+  - database/schema.sql (modernized schema with foreign keys, proper types)
+  - database/seed.sql (default admin user with bcrypt password)
+  - storage/images/.gitkeep and storage/uploads/.gitkeep
+  - Updated README.md with Docker quick-start and manual installation instructions
+
+### Changed
+- Converted README to Markdown format (README.md) with improved structure and wording
+- Moved original README to `/legacy/README`
+- Completed Phase 1: Assessment & Planning
+  - Analyzed 38 PHP files (~6,100 lines)
+  - Identified 5 third-party dependencies (jscalendar 0.9.6, Treeview 4.3, BarelyFitz Slideshow 1.16, Mint analytics, Smarty)
+  - Cataloged 150+ security vulnerabilities (100+ SQL injection, 30+ XSS, command injection, CSRF gaps)
+  - Cataloged 219 deprecated PHP pattern occurrences (107 mysql_*, 91 ${var} interpolations, etc.)

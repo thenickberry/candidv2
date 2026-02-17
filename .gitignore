@@ -1,0 +1,55 @@
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Storage
+storage/images/*
+storage/uploads/*
+storage/cache/*
+storage/logs/*
+!storage/**/.gitkeep
+
+# Legacy upload directory
+htdocs/incoming/*
+!htdocs/incoming/.gitkeep
+
+# Dependencies
+vendor/
+node_modules/
+
+# IDE and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+
+# Logs
+*.log
+
+# Compiled/cache files
+*.cache
+*.tmp
+
+# PHPUnit
+.phpunit.result.cache
+.phpunit.cache/
+coverage/
+
+# Composer
+composer.lock
+
+# Build artifacts
+build/
+dist/
+
+# Playwright
+playwright-report/
+playwright/.cache/
+test-results/

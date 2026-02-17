@@ -1,0 +1,15 @@
+{
+  "name": "candidv2-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "description": "E2E tests for CANDIDv2",
+  "scripts": {
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:debug": "playwright test --debug"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.42.0"
+  }
+}
