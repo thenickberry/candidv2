@@ -99,7 +99,10 @@ test.describe('Lightbox', () => {
       const firstSrc = await page.locator('.lightbox-image').getAttribute('src');
 
       await page.keyboard.press('ArrowRight');
-      await page.waitForTimeout(300); // Wait for image transition
+      await page.waitForFunction(
+        (src) => document.querySelector('.lightbox-image')?.getAttribute('src') !== src,
+        firstSrc
+      );
 
       const secondSrc = await page.locator('.lightbox-image').getAttribute('src');
       expect(secondSrc).not.toEqual(firstSrc);
