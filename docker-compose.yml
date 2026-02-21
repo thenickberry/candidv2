@@ -1,0 +1,71 @@
+services:
+  caddy:
+    image: caddy:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./public:/var/www/public:ro
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      - app
+    networks:
+      - candid-network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./public:/var/www/public
+      - ./src:/var/www/src
+      - ./config:/var/www/config
+      - ./templates:/var/www/templates
+      - ./bootstrap.php:/var/www/bootstrap.php
+      - ./composer.json:/var/www/composer.json
+      - ./.env:/var/www/.env
+      - ./storage:/var/www/storage
+      - ./vendor:/var/www/vendor
+      - ./tests:/var/www/tests
+      - ./phpunit.xml:/var/www/phpunit.xml
+      - ./phpstan.neon:/var/www/phpstan.neon
+      - ./composer.lock:/var/www/composer.lock
+      - ./docker/php.ini:/usr/local/etc/php/conf.d/custom.ini
+      - ./scripts:/var/www/scripts
+    environment:
+      - DB_HOST=db
+      - DB_NAME=${DB_NAME:-candid}
+      - DB_USER=${DB_USER:-candid}
+      - DB_PASS=${DB_PASS:-candid_secret}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - candid-network
+
+  db:
+    image: mariadb:11
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root_secret}
+      - MYSQL_DATABASE=${DB_NAME:-candid}
+      - MYSQL_USER=${DB_USER:-candid}
+      - MYSQL_PASSWORD=${DB_PASS:-candid_secret}
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - candid-network
+
+volumes:
+  db-data:
+
+networks:
+  candid-network:
+    driver: bridge

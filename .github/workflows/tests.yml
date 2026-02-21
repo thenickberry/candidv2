@@ -1,0 +1,172 @@
+name: Tests
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: candid_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    strategy:
+      matrix:
+        php: ['8.3', '8.4']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: pdo, pdo_mysql, gd, exif
+          coverage: xdebug
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Wait for MySQL
+        run: |
+          while ! mysqladmin ping -h"127.0.0.1" --silent; do
+            sleep 1
+          done
+
+      - name: Setup test database
+        run: mysql -h 127.0.0.1 -u root -proot candid_test < database/schema.sql
+
+      - name: Run unit tests
+        run: vendor/bin/phpunit --testsuite Unit --testdox
+
+      - name: Run integration tests
+        env:
+          DB_HOST: 127.0.0.1
+          DB_NAME: candid_test
+          DB_USER: root
+          DB_PASS: root
+        run: vendor/bin/phpunit --testsuite Integration --testdox
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo, pdo_mysql, gd, exif
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: PHP syntax check
+        run: find src tests -name "*.php" -exec php -l {} \; | grep -v "No syntax errors"
+
+      - name: PHPStan static analysis
+        run: vendor/bin/phpstan analyse
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: [test, lint]
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: candid
+          MYSQL_USER: candid
+          MYSQL_PASSWORD: candid_secret
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo, pdo_mysql, gd, exif
+
+      - name: Install PHP dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Setup database
+        run: |
+          mysql -h 127.0.0.1 -u root -proot candid < database/schema.sql
+          mysql -h 127.0.0.1 -u root -proot candid < database/seed.sql
+
+      - name: Create .env file
+        run: |
+          cat > .env << EOF
+          DB_HOST=127.0.0.1
+          DB_NAME=candid
+          DB_USER=candid
+          DB_PASS=candid_secret
+          EOF
+
+      - name: Start PHP server
+        run: |
+          php -S localhost:8080 -t public &
+          sleep 2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Playwright
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Run Playwright tests
+        run: npx playwright test --project=chromium
+        env:
+          BASE_URL: http://localhost:8080
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
