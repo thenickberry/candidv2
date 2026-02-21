@@ -1,4 +1,8 @@
-# Phases
+# Modernization effort by phases
+
+CANDIDv2 was originally created in 2004 with httpd/PHP4 (when Apache was pseudonymous with httpd). Over 20 years of software evolvution and with zero investment in this project, CANDIDv2 was not able to run in modern day. With the help of Claude Code, this file descriptions phases of implementation to modernize the project (modern PHP, modern MySQL, modern libraries, migrate away from abandoned dependencies, testing) and add a few features along the way (modal-based interactions, responsive design, upload indicators, soft deletes).
+
+> **While this file is no longer required for the project, it remains here as an example artifact.**
 
 ## Phase 1: Assessment & Planning
 - [x] Read the full codebase and produce a project overview
