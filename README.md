@@ -22,7 +22,7 @@ CANDIDv2 is an image database application for organizing, searching, and browsin
 - PHP 8.3+
 - MariaDB 11+
 - Caddy (or any web server) + PHP-FPM
-- PHP extensions: `imagick`, `pdo_mysql`, `exif`, `zip`
+- PHP extensions: `pdo_mysql`, `exif`, `zip`, `imagick` (required by Intervention Image)
 
 ## Quick Start (Docker)
 
