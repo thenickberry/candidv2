@@ -180,55 +180,6 @@
     <?php endif; ?>
 </div>
 
-<style>
-    .trash-tabs {
-        display: flex;
-        gap: 0;
-        border-bottom: 2px solid var(--gray-200);
-    }
-
-    .trash-tab {
-        background: none;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        cursor: pointer;
-        color: var(--gray-600);
-        font-weight: 500;
-        border-bottom: 2px solid transparent;
-        margin-bottom: -2px;
-        transition: color 0.2s, border-color 0.2s;
-    }
-
-    .trash-tab:hover {
-        color: var(--gray-800);
-    }
-
-    .trash-tab.active {
-        color: var(--primary);
-        border-bottom-color: var(--primary);
-    }
-
-    .trash-panel {
-        display: none;
-    }
-
-    .trash-panel.active {
-        display: block;
-    }
-
-    .bulk-actions {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding-top: 1rem;
-        border-top: 1px solid var(--gray-200);
-    }
-
-    .action-icon:hover {
-        background: none;
-    }
-</style>
-
 <script>
     // Tab switching
     document.querySelectorAll('.trash-tab').forEach(tab => {

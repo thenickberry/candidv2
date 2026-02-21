@@ -33,6 +33,10 @@
     </div>
 <?php else: ?>
     <div class="card">
-        <p>No images yet. <a href="/image/add">Upload one!</a></p>
+        <?php if ($auth->check()): ?>
+            <p>No images yet. <a href="#" onclick="openUploadModal(); return false;">Upload one!</a></p>
+        <?php else: ?>
+            <p>No images yet.</p>
+        <?php endif; ?>
     </div>
 <?php endif; ?>

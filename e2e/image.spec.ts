@@ -28,8 +28,8 @@ test.describe('Image Upload', () => {
     await page.goto('/image/add');
 
     await expect(page.locator('h2')).toContainText('Upload');
-    await expect(page.locator('input[type="file"]')).toBeVisible();
-    await expect(page.locator('select[name="category_id"]')).toBeVisible();
+    await expect(page.locator('#images')).toBeVisible();
+    await expect(page.locator('select#category_id')).toBeVisible();
   });
 
   test('should require file selection', async ({ page }) => {
@@ -68,7 +68,8 @@ test.describe('Image Upload', () => {
       if (categoryId) {
         await page.goto(`/image/add?category=${categoryId}`);
 
-        const selectedValue = await page.locator('select[name="category_id"]').inputValue();
+        // Use specific ID to avoid matching search modal's category select
+        const selectedValue = await page.locator('select#category_id').inputValue();
         expect(selectedValue).toBe(categoryId);
       }
     }
@@ -180,7 +181,7 @@ test.describe('Image Bulk Edit', () => {
     }
   });
 
-  test('should navigate to bulk edit page when Edit Selected is clicked', async ({ page }) => {
+  test('should open bulk edit modal when Edit Selected is clicked', async ({ page }) => {
     const loggedIn = await login(page);
     if (!loggedIn) {
       test.skip();
@@ -209,9 +210,9 @@ test.describe('Image Bulk Edit', () => {
           // Click Edit Selected
           await page.locator('#bulkEditBtn').click();
 
-          // Should be on bulk edit page
-          await expect(page.url()).toContain('/image/bulk/edit');
-          await expect(page.locator('h2')).toContainText('Edit');
+          // Should show bulk edit modal
+          await expect(page.locator('#bulk-edit-modal')).toHaveClass(/active/);
+          await expect(page.locator('#bulk-edit-title')).toContainText('Edit');
         }
       }
     }

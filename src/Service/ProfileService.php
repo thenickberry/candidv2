@@ -67,7 +67,7 @@ class ProfileService
     /**
      * Get display name for a user
      */
-    public function getDisplayName(array $user, string $format = null): string
+    public function getDisplayName(array $user, ?string $format = null): string
     {
         $format = $format ?? ($user['name_disp'] ?? 'fname');
 

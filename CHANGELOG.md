@@ -23,11 +23,41 @@ All notable changes to CANDIDv2 are documented in this file.
   - Works on home, browse, and search results pages
   - Changes save via AJAX without page reload
   - Caption updates instantly after save
+- Category edit modal
+  - Click pencil icon in breadcrumb to edit category
+  - Edit name, description, visibility, and default sort order
+  - Changes save via AJAX without page reload
+  - Page title and breadcrumb update instantly after save
+- Category add modal
+  - Click "Add Category" button on browse page to open modal
+  - Set name, description, parent category, and visibility
+  - Redirects to new category after creation
+- Upload modal
+  - Click "Upload" in navigation or category pages to open modal
+  - Select files, category, and options without leaving current page
+  - Progress bar shows upload and processing status
+  - Redirects to category after successful upload
+- Bulk edit modal
+  - Select images and click "Edit" to open modal
+  - Edit description, date, category, access level, and privacy
+  - Add or remove people tags from multiple images at once
+  - Shows thumbnails of selected images
+  - Changes apply to all selected images at once
+- Search modal
+  - Click "Search" in navigation to open modal
+  - All search filters available: keywords, date range, photographer, category, tagged people, sort order
+  - Submits to search results page
+  - Options loaded via AJAX on first open
 
 ### Changed
 - Moved CSS from inline `<style>` block to external file `public/assets/css/app.css`
   - Enables browser caching
   - Cleaner separation of concerns
+- Consolidated all inline CSS from template files into app.css
+  - Error pages (403, 404, 500)
+  - Image edit, view, and bulk-edit pages
+  - Upload page progress bar and category modal
+  - Trash page tabs and panels
 - Switched from Nginx to Caddy web server
   - Simpler configuration (Caddyfile vs nginx.conf)
   - Automatic HTTPS support (when deployed with domain)

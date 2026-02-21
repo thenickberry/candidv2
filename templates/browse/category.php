@@ -4,29 +4,15 @@
         <?php foreach ($breadcrumb as $i => $crumb): ?>
             <?php $isLast = ($i === count($breadcrumb) - 1); ?>
             <span>
-                <a href="/browse/<?= h($crumb['id']) ?>"><?= h($crumb['name']) ?></a><?php if ($isLast && ($canEdit ?? false)): ?><a href="/category/<?= h($crumb['id']) ?>/edit" class="edit-icon" title="Edit category"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></a><?php endif; ?>
+                <a href="/browse/<?= h($crumb['id']) ?>"><?= h($crumb['name']) ?></a><?php if ($isLast && ($canEdit ?? false)): ?><button type="button" onclick="openCategoryEditModal(<?= (int)$crumb['id'] ?>)" class="edit-icon" title="Edit category"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></button><?php endif; ?>
             </span>
         <?php endforeach; ?>
     </div>
 <?php endif; ?>
 
-<div class="flex-between mb-2">
-    <h2><?= h($category['name']) ?></h2>
-    <?php if ($auth->check() && !empty($images)): ?>
-        <div class="flex-center">
-            <a href="/image/add?category=<?= h($category['id']) ?>" class="btn">Upload</a>
-            <a href="#" id="toggleSelectMode" class="btn-icon" title="Select images for bulk editing">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="3" width="7" height="7" rx="1"></rect>
-                    <rect x="14" y="3" width="7" height="7" rx="1"></rect>
-                    <rect x="3" y="14" width="7" height="7" rx="1"></rect>
-                    <rect x="14" y="14" width="7" height="7" rx="1"></rect>
-                    <polyline points="17 8 19 10 23 6" stroke-width="2.5"></polyline>
-                </svg>
-            </a>
-        </div>
-    <?php endif; ?>
-</div>
+<script>window.currentCategoryId = <?= (int)$category['id'] ?>;</script>
+
+<h2 class="mb-2"><?= h($category['name']) ?></h2>
 
 <?php if ($category['descr']): ?>
     <p class="mb-2"><?= h($category['descr']) ?></p>
@@ -45,6 +31,28 @@
 <?php endif; ?>
 
 <?php if (!empty($images)): ?>
+    <div class="mb-1" style="display: flex; justify-content: flex-end; align-items: center; gap: 1rem;">
+        <form method="GET" action="/browse/<?= h($category['id']) ?>" class="flex-center" style="width: fit-content;">
+            <label for="sort" class="small" style="white-space: nowrap">Sort by:</label>
+            <select id="sort" name="sort" onchange="this.form.submit()" style="width: auto;">
+                <option value="date_taken" <?= ($currentSort ?? 'date_taken') === 'date_taken' ? 'selected' : '' ?>>Date Taken</option>
+                <option value="date_added" <?= ($currentSort ?? '') === 'date_added' ? 'selected' : '' ?>>Date Added</option>
+                <option value="description" <?= ($currentSort ?? '') === 'description' ? 'selected' : '' ?>>Description</option>
+            </select>
+        </form>
+        <?php if ($auth->check()): ?>
+            <a href="#" id="toggleSelectMode" class="btn-icon" title="Select images for bulk editing">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+                    <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+                    <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+                    <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+                    <polyline points="17 8 19 10 23 6" stroke-width="2.5"></polyline>
+                </svg>
+            </a>
+        <?php endif; ?>
+    </div>
+
     <?php if ($auth->check()): ?>
         <div class="bulk-actions-bar" id="bulkActionsBar" style="display: none;">
             <span id="selectionCount">0 selected</span>
@@ -65,17 +73,6 @@
             <input type="hidden" name="return_url" value="/browse/<?= h($category['id']) ?>">
         </form>
     <?php endif; ?>
-
-    <div class="mb-1">
-        <form method="GET" action="/browse/<?= h($category['id']) ?>" class="flex-center" style="width: fit-content;">
-            <label for="sort" class="small" style="white-space: nowrap">Sort by:</label>
-            <select id="sort" name="sort" onchange="this.form.submit()" style="width: auto;">
-                <option value="date_taken" <?= ($currentSort ?? 'date_taken') === 'date_taken' ? 'selected' : '' ?>>Date Taken</option>
-                <option value="date_added" <?= ($currentSort ?? '') === 'date_added' ? 'selected' : '' ?>>Date Added</option>
-                <option value="description" <?= ($currentSort ?? '') === 'description' ? 'selected' : '' ?>>Description</option>
-            </select>
-        </form>
-    </div>
 
     <div class="image-grid" id="imageGrid">
         <?php foreach ($images as $image):
@@ -166,8 +163,8 @@
                 Modal.alert('No Selection', 'Please select at least one image.');
                 return;
             }
-            const ids = selected.map(cb => cb.value).join(',');
-            window.location.href = '/image/bulk/edit?ids=' + ids + '&return_url=' + encodeURIComponent(window.location.pathname);
+            const ids = selected.map(cb => cb.value);
+            openBulkEditModal(ids);
         });
 
         document.getElementById('bulkRotateBtn').addEventListener('click', function(e) {
@@ -196,9 +193,6 @@
     <?php endif; ?>
 <?php else: ?>
     <div class="card text-center" style="padding: 3rem 1.5rem;">
-        <p class="mb-2" style="color: var(--gray-600);">No images in this category.</p>
-        <?php if ($auth->check()): ?>
-            <a href="/image/add?category=<?= h($category['id']) ?>" class="btn">Upload Images</a>
-        <?php endif; ?>
+        <p style="color: var(--gray-600);">No images in this category.</p>
     </div>
 <?php endif; ?>

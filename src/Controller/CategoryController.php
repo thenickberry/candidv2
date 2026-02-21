@@ -56,6 +56,28 @@ class CategoryController extends Controller
     }
 
     /**
+     * Get categories and users list as JSON for modals
+     */
+    public function listJson(): void
+    {
+        $this->requireAuth();
+
+        header('Content-Type: application/json');
+
+        $categories = $this->getCategoryService()->getFlatList();
+
+        $users = $this->db()->fetchAll(
+            "SELECT id, username, fname, lname FROM user WHERE onlist = 'y' ORDER BY lname, fname"
+        );
+
+        echo json_encode([
+            'categories' => $categories,
+            'users' => $users,
+            'csrfToken' => csrf_token(),
+        ]);
+    }
+
+    /**
      * Create category via AJAX (returns JSON)
      */
     public function addJson(): void
@@ -75,10 +97,10 @@ class CategoryController extends Controller
 
         $id = $this->getCategoryService()->create([
             'name' => $name,
-            'descr' => '',
+            'descr' => $this->input('descr', ''),
             'parent' => $this->input('parent_id') ?: null,
             'owner' => $this->user()['id'],
-            'public' => 'y',
+            'public' => $this->input('public', 'y'),
         ]);
 
         $this->getHistoryService()->log(
@@ -119,6 +141,101 @@ class CategoryController extends Controller
             'title' => 'Edit Category',
             'category' => $category,
             'categories' => $categories,
+        ]);
+    }
+
+    /**
+     * Get category data as JSON for modal editing
+     */
+    public function getJson(string $id): void
+    {
+        $this->requireAuth();
+
+        $categoryId = (int) $id;
+        $category = $this->getCategoryService()->find($categoryId);
+
+        header('Content-Type: application/json');
+
+        if (!$category) {
+            http_response_code(404);
+            echo json_encode(['error' => 'Category not found']);
+            return;
+        }
+
+        if (!$this->getCategoryService()->canEdit($categoryId, $this->user())) {
+            http_response_code(403);
+            echo json_encode(['error' => 'Forbidden']);
+            return;
+        }
+
+        echo json_encode([
+            'category' => [
+                'id' => $category['id'],
+                'name' => $category['name'],
+                'descr' => $category['descr'] ?? '',
+                'public' => $category['public'] ?? 'y',
+                'sort_by' => $category['sort_by'] ?? '',
+            ],
+            'csrfToken' => csrf_token(),
+        ]);
+    }
+
+    /**
+     * Update category via AJAX (returns JSON)
+     */
+    public function editJson(string $id): void
+    {
+        $this->requireAuth();
+        $this->validateCsrf();
+
+        $categoryId = (int) $id;
+
+        header('Content-Type: application/json');
+
+        if (!$this->getCategoryService()->canEdit($categoryId, $this->user())) {
+            http_response_code(403);
+            echo json_encode(['error' => 'Forbidden']);
+            return;
+        }
+
+        $name = trim($this->input('name', ''));
+
+        if (empty($name)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Category name is required.']);
+            return;
+        }
+
+        $sortBy = $this->input('sort_by', '');
+        $validSorts = ['date_taken', 'date_added', 'description', ''];
+        if (!in_array($sortBy, $validSorts)) {
+            $sortBy = '';
+        }
+
+        $this->getCategoryService()->update($categoryId, [
+            'name' => $name,
+            'descr' => $this->input('descr', ''),
+            'public' => $this->input('public', 'y'),
+            'sort_by' => $sortBy ?: null,
+        ]);
+
+        $this->getHistoryService()->log(
+            'update',
+            $this->user()['id'],
+            "Updated category: {$name}",
+            'category',
+            $categoryId
+        );
+
+        echo json_encode([
+            'success' => true,
+            'category' => [
+                'id' => $categoryId,
+                'name' => $name,
+                'descr' => $this->input('descr', ''),
+                'public' => $this->input('public', 'y'),
+                'sort_by' => $sortBy,
+            ],
         ]);
     }
 

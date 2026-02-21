@@ -1,7 +1,7 @@
 <div class="flex-between mb-2">
     <h2>Browse Categories</h2>
     <?php if ($canAddCategory ?? false): ?>
-        <a href="/category/add" class="btn">Add Category</a>
+        <button type="button" class="btn" onclick="openCategoryAddModal()">Add Category</button>
     <?php endif; ?>
 </div>
 
