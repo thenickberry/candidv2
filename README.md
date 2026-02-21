@@ -179,8 +179,7 @@ Tests run automatically via GitHub Actions on push/PR (PHP 8.3 and 8.4).
 ## Documentation
 
 - [CHANGELOG.md](CHANGELOG.md) — Log of all changes with rationale
-- [PHASES.md](PHASES.md) — Roadmap and task tracking
-- [MODERNIZATION_PLAN.md](MODERNIZATION_PLAN.md) — Technical assessment
+- [PHASES.md](PHASES.md) — History of the modernization effort
 
 ## License
 

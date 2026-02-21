@@ -42,9 +42,6 @@ docker-compose.override.yml
 .phpunit.cache/
 coverage/
 
-# Composer
-composer.lock
-
 # Build artifacts
 build/
 dist/
