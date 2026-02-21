@@ -28,7 +28,7 @@ CANDIDv2 is an image database application for organizing, searching, and browsin
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/thenickberry/candidv2
 cd candidv2
 
 # Copy environment configuration
