@@ -130,8 +130,8 @@
                 Modal.alert('No Selection', 'Please select at least one image.');
                 return;
             }
-            const ids = selected.map(cb => cb.value).join(',');
-            window.location.href = '/image/bulk/edit?ids=' + ids + '&return_url=' + encodeURIComponent(window.location.href);
+            const ids = selected.map(cb => cb.value);
+            openBulkEditModal(ids);
         });
 
         document.getElementById('bulkRotateBtn').addEventListener('click', function(e) {

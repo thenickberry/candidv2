@@ -43,6 +43,44 @@ class SearchController extends Controller
         ]);
     }
 
+    /**
+     * Get search options as JSON for modal
+     */
+    public function optionsJson(): void
+    {
+        header('Content-Type: application/json');
+
+        // Get categories for dropdown
+        $categories = $this->db()->fetchAll(
+            "SELECT id, name FROM category WHERE deleted_at IS NULL ORDER BY name"
+        );
+
+        // Get photographers for dropdown
+        $photographers = $this->db()->fetchAll(
+            "SELECT DISTINCT u.id, u.fname, u.lname
+             FROM user u
+             JOIN image_info i ON u.id = i.photographer
+             WHERE i.deleted_at IS NULL
+             ORDER BY u.lname, u.fname"
+        );
+
+        // Get people who are tagged in images
+        $taggedPeople = $this->db()->fetchAll(
+            "SELECT DISTINCT u.id, u.fname, u.lname
+             FROM user u
+             JOIN people p ON u.id = p.user_id
+             JOIN image_info i ON p.image_id = i.id
+             WHERE i.deleted_at IS NULL
+             ORDER BY u.lname, u.fname"
+        );
+
+        echo json_encode([
+            'categories' => $categories,
+            'photographers' => $photographers,
+            'taggedPeople' => $taggedPeople,
+        ]);
+    }
+
     public function results(): string
     {
         $userAccess = $this->user()['access'] ?? 0;

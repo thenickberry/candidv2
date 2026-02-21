@@ -129,7 +129,7 @@ class CategoryService
     /**
      * Get all categories as a flat list with depth info (for dropdowns, excludes soft-deleted)
      */
-    public function getFlatList(int $parentId = null, int $depth = 0): array
+    public function getFlatList(?int $parentId = null, int $depth = 0): array
     {
         $categories = [];
 

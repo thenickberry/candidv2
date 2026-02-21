@@ -688,7 +688,7 @@ class ImageController extends Controller
     /**
      * Get categories for dropdown (excludes soft-deleted)
      */
-    private function getCategories(int $parentId = null, int $depth = 0): array
+    private function getCategories(?int $parentId = null, int $depth = 0): array
     {
         $categories = [];
 
@@ -915,6 +915,109 @@ class ImageController extends Controller
 
         $returnUrl = $this->input('return_url', '/');
         $this->redirect($returnUrl);
+    }
+
+    /**
+     * Process bulk edit via JSON
+     */
+    public function bulkEditJson(): void
+    {
+        $this->requireAuth();
+        $this->validateCsrf();
+
+        header('Content-Type: application/json');
+
+        $ids = (array) $this->input('image_ids', []);
+        $updated = 0;
+
+        foreach ($ids as $id) {
+            $imageId = (int) $id;
+            $image = $this->db()->fetchOne(
+                "SELECT * FROM image_info WHERE id = :id AND deleted_at IS NULL",
+                ['id' => $imageId]
+            );
+
+            if (!$image || !$this->canEditImage($image)) {
+                continue;
+            }
+
+            $updates = [];
+
+            $description = $this->input('description');
+            if ($description !== null && $description !== '') {
+                $updates['descr'] = $description;
+            }
+
+            $dateTaken = $this->input('date_taken');
+            if ($dateTaken !== null && $dateTaken !== '') {
+                $updates['date_taken'] = $dateTaken;
+            }
+
+            $access = $this->input('access');
+            if ($access !== null && $access !== '') {
+                $updates['access'] = (int) $access;
+            }
+
+            $private = $this->input('private');
+            if ($private !== null && $private !== '') {
+                $updates['private'] = (int) $private;
+            }
+
+            $photographer = $this->input('photographer');
+            if ($photographer !== null && $photographer !== '') {
+                $updates['photographer'] = (int) $photographer;
+            }
+
+            if (!empty($updates)) {
+                $this->db()->update('image_info', $updates, 'id = :id', ['id' => $imageId]);
+            }
+
+            $categoryId = $this->input('category_id');
+            if ($categoryId !== null && $categoryId !== '') {
+                $this->db()->delete('image_category', 'image_id = :id', ['id' => $imageId]);
+                if ((int) $categoryId > 0) {
+                    $this->db()->insert('image_category', [
+                        'image_id' => $imageId,
+                        'category_id' => (int) $categoryId,
+                        'pri' => 'y',
+                    ]);
+                }
+            }
+
+            $addPeople = $this->input('add_people') ?? [];
+            if (is_array($addPeople)) {
+                foreach ($addPeople as $personId) {
+                    $exists = $this->db()->fetchOne(
+                        "SELECT 1 FROM people WHERE image_id = :iid AND user_id = :uid",
+                        ['iid' => $imageId, 'uid' => (int) $personId]
+                    );
+                    if (!$exists) {
+                        $this->db()->insert('people', [
+                            'image_id' => $imageId,
+                            'user_id' => (int) $personId,
+                        ]);
+                    }
+                }
+            }
+
+            $removePeople = $this->input('remove_people') ?? [];
+            if (is_array($removePeople)) {
+                foreach ($removePeople as $personId) {
+                    $this->db()->delete(
+                        'people',
+                        'image_id = :iid AND user_id = :uid',
+                        ['iid' => $imageId, 'uid' => (int) $personId]
+                    );
+                }
+            }
+
+            $updated++;
+        }
+
+        echo json_encode([
+            'success' => true,
+            'updated' => $updated,
+        ]);
     }
 
     /**

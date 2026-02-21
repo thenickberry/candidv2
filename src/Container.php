@@ -24,7 +24,7 @@ class Container
         $this->config = $config;
     }
 
-    public function config(string $key = null, mixed $default = null): mixed
+    public function config(?string $key = null, mixed $default = null): mixed
     {
         if ($key === null) {
             return $this->config;

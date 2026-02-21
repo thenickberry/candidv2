@@ -6,7 +6,8 @@ test.describe('Browse', () => {
 
     await expect(page.locator('h1 a')).toContainText('CANDIDv2');
     await expect(page.locator('a[href="/browse"]')).toBeVisible();
-    await expect(page.locator('a[href="/search"]')).toBeVisible();
+    // Search is now a modal trigger
+    await expect(page.locator('nav a[onclick*="openSearchModal"]')).toBeVisible();
   });
 
   test('should show browse page with categories', async ({ page }) => {
@@ -36,7 +37,8 @@ test.describe('Browse', () => {
 
     if (hasCategories) {
       await categoryLink.click();
-      const sortSelect = page.locator('select[name="sort"]');
+      // Use the page sort dropdown (not the search modal's)
+      const sortSelect = page.locator('select#sort');
       if (await sortSelect.count() > 0) {
         await expect(sortSelect).toBeVisible();
       }

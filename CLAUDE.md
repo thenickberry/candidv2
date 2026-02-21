@@ -22,7 +22,7 @@ CANDIDv2 is a modern PHP-based image management application.
 
 Run these after making code changes:
 
-### PHP (required after any PHP changes)
+### PHP (required after any changes)
 ```bash
 # Unit and integration tests (102 tests)
 docker exec candidv2-app-1 php vendor/bin/phpunit
@@ -31,13 +31,13 @@ docker exec candidv2-app-1 php vendor/bin/phpunit
 docker exec candidv2-app-1 vendor/bin/phpstan analyse
 ```
 
-### E2E (run after significant UI/flow changes)
+### E2E (required after any changes)
 ```bash
 # Install dependencies (first time only)
 npm install
 npx playwright install
 
-# Run all E2E tests (31 tests × 4 browsers = 124 total)
+# Run all E2E tests (33 tests × 4 browsers = 132 total)
 npx playwright test
 
 # Run specific browser only
@@ -90,7 +90,7 @@ All tests run automatically on push/PR via GitHub Actions:
 
 Before considering any task complete, verify:
 
-1. **Tests pass** — Run PHPUnit and PHPStan (see Testing section)
+1. **Tests pass** — Run PHPUnit, PHPStan, and Playwright (see Testing section)
 2. **Tests added** — Add unit/integration tests for new functionality
 3. **CHANGELOG.md updated** — Log the change with date and description
 4. **PHASES.md updated** — Mark tasks complete or add new features to the list

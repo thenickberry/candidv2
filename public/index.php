@@ -35,6 +35,7 @@ $router
     ->post('/image/add', 'ImageController', 'add')
     ->get('/image/bulk/edit', 'ImageController', 'showBulkEdit')
     ->post('/image/bulk/edit', 'ImageController', 'bulkEdit')
+    ->post('/image/bulk/edit-json', 'ImageController', 'bulkEditJson')
     ->post('/image/bulk/delete', 'ImageController', 'bulkDelete')
     ->post('/image/bulk/rotate', 'ImageController', 'bulkRotate')
     ->get('/image/{id}/edit', 'ImageController', 'showEdit')
@@ -48,14 +49,18 @@ $router
 
     // Search
     ->get('/search', 'SearchController', 'index')
+    ->get('/search/options-json', 'SearchController', 'optionsJson')
     ->get('/search/results', 'SearchController', 'results')
 
     // Categories
     ->get('/category/add', 'CategoryController', 'showAdd')
     ->post('/category/add', 'CategoryController', 'add')
+    ->get('/category/list-json', 'CategoryController', 'listJson')
     ->post('/category/add-json', 'CategoryController', 'addJson')
     ->get('/category/{id}/edit', 'CategoryController', 'showEdit')
     ->post('/category/{id}/edit', 'CategoryController', 'edit')
+    ->get('/category/{id}/json', 'CategoryController', 'getJson')
+    ->post('/category/{id}/edit-json', 'CategoryController', 'editJson')
     ->get('/category/{id}/deletion-stats', 'CategoryController', 'deletionStats')
     ->post('/category/{id}/delete', 'CategoryController', 'delete')
 
