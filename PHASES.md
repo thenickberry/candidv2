@@ -402,3 +402,10 @@ Tasks discovered during implementation that were not in the original plan:
 - [x] **Removed unused profile fields** — Cleaned up user profile:
   - Removed numrows/numcols form fields from edit page
   - Removed from controller and service update methods
+- [x] **Project file reorganization** — Aligned directory layout with Laravel/Symfony conventions:
+  - `e2e/` → `tests/e2e/` (all tests under one `tests/` tree)
+  - `Dockerfile` → `docker/Dockerfile` (all container config together)
+  - `scripts/` → `bin/` (Symfony/Composer CLI convention)
+  - `templates/` → `resources/` (Laravel/Symfony view convention)
+  - `bootstrap.php` → `bootstrap/app.php` (Laravel bootstrap pattern)
+  - Updated all references in `docker-compose.yml`, `docker/Dockerfile`, `playwright.config.ts`, `public/index.php`, `config/config.php`, and all `bin/` scripts

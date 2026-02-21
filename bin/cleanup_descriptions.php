@@ -14,7 +14,7 @@ declare(strict_types=1);
  *   php scripts/cleanup_descriptions.php --execute # Actually update database
  */
 
-require dirname(__DIR__) . '/bootstrap.php';
+require dirname(__DIR__) . '/bootstrap/app.php';
 
 use App\Service\Database;
 

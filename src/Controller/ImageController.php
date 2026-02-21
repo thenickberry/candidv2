@@ -607,8 +607,23 @@ class ImageController extends Controller
                 if (isset($exif['DateTimeOriginal'])) {
                     $dateTaken = date('Y-m-d H:i:s', strtotime($exif['DateTimeOriginal']));
                 }
-                if (isset($exif['Model'])) {
-                    $camera = $exif['Model'];
+                // Only attribute a camera when exposure-related fields are present.
+                // Scanners and printers embed Make/Model in EXIF but lack these fields.
+                $isCamera = isset($exif['ExposureTime']) || isset($exif['FNumber']) || isset($exif['ISOSpeedRatings']);
+                if ($isCamera) {
+                    $make  = trim($exif['Make']  ?? '');
+                    $model = trim($exif['Model'] ?? '');
+                    if ($make && $model) {
+                        // Use only the first word of make for deduplication
+                        // e.g. "NIKON CORPORATION" + "NIKON D700" → "NIKON D700"
+                        //      "Apple" + "iPhone 15 Pro Max" → "Apple iPhone 15 Pro Max"
+                        $makePrefix = strtok($make, ' ');
+                        $camera = stripos($model, (string)$makePrefix) === 0 ? $model : "$makePrefix $model";
+                    } elseif ($model) {
+                        $camera = $model;
+                    } elseif ($make) {
+                        $camera = $make;
+                    }
                 }
             }
 

@@ -42,8 +42,8 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction || true
 COPY public/ /var/www/public/
 COPY src/ /var/www/src/
 COPY config/ /var/www/config/
-COPY templates/ /var/www/templates/
-COPY bootstrap.php /var/www/
+COPY resources/ /var/www/resources/
+COPY bootstrap/ /var/www/bootstrap/
 COPY .env /var/www/.env
 
 # Create storage directories

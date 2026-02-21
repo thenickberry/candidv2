@@ -2,6 +2,50 @@
 
 All notable changes to CANDIDv2 are documented in this file.
 
+## 2026-02-21 (2)
+
+### Fixed
+- **Card description invisible** — home and browse card captions were missing the `caption-meta` row, leaving the description `<a>` as the only flex child in a `justify-content: space-between` container; with no text content (NULL `descr`) it collapsed to near-zero height. Added `caption-meta` with photographer + date to `resources/home/index.php` and `resources/browse/category.php`, matching `search/results.php`
+- **Lightbox "Invalid Date"** — `formatDate()` in `lightbox.js` appended `'T00:00:00'` to the raw PHP datetime string `"YYYY-MM-DD HH:MM:SS"`, producing an unparseable literal. Fixed by replacing the space with `'T'` to produce valid ISO 8601, plus added `isNaN` guard
+- **Camera EXIF: only Model stored, not Make+Model** — `ImageController` only read `$exif['Model']` and ignored `$exif['Make']`. Fixed to combine Make + Model (using first word of Make to avoid "NIKON CORPORATION NIKON D700" duplication). Also added scanner/printer detection: camera is now set to NULL when no exposure-related EXIF fields (`ExposureTime`, `FNumber`, `ISOSpeedRatings`) are present — this correctly identifies Canon MX310 scanner images as having no camera
+- **Camera data backfill** — ran `bin/backfill_camera.php` to apply corrected logic to all existing images: 53 scanner images cleared, 2 images updated with proper Make prefix
+
+### Added
+- `bin/backfill_camera.php` — re-reads EXIF from all image files and recomputes camera field; supports `--dry-run`
+
+## 2026-02-21
+
+### Fixed
+- `bootstrap/app.php`: `ROOT_PATH` used `__DIR__` (resolves to `/var/www/bootstrap/`) instead of `dirname(__DIR__)` — caused fatal error on every request after bootstrap was moved to `bootstrap/app.php`
+
+### Added — E2E coverage improvements
+- `tests/e2e/smoke.spec.ts`: 7 new tests checking HTTP 2xx status and absence of PHP error text on all key public and authenticated pages — ensures a broken bootstrap/fatal error is always caught
+- Hardened `browse.spec.ts`: removed `if (hasCategories)` silent-pass guards on "navigate to category" and "sort dropdown" tests; seed data guarantees a category exists so these are now hard assertions
+
+## 2026-02-20 (2)
+
+### Changed — Project file reorganization
+- Moved `e2e/` → `tests/e2e/` (all test types under one `tests/` tree)
+- Moved `Dockerfile` → `docker/Dockerfile` (all container config in `docker/`)
+- Renamed `scripts/` → `bin/` (Symfony/Composer convention for CLI scripts)
+- Renamed `templates/` → `resources/` (Laravel/Symfony convention for views)
+- Moved `bootstrap.php` → `bootstrap/app.php` (Laravel convention)
+- Updated `playwright.config.ts`: `testDir` → `./tests/e2e`
+- Updated `docker-compose.yml`: dockerfile ref, volume paths for `resources/`, `bootstrap/`, `bin/`
+- Updated `docker/Dockerfile`: COPY paths for `resources/` and `bootstrap/`
+- Updated `public/index.php`: bootstrap path → `bootstrap/app.php`
+- Updated `config/config.php`: templates path → `resources/`
+- Updated all `bin/` scripts: bootstrap path → `bootstrap/app.php`
+
+## 2026-02-20
+
+### Removed
+- Deleted `INSTALL` — ancient installation guide for PHP 4.3/MySQL 3.x, no longer relevant
+- Deleted `TODO` — undated notes from 2004, superseded by PHASES.md
+- Deleted `FRAMEWORK_EVALUATION.md` — design decision doc from modernization, no longer needed
+- Deleted `smarty/` directory — unused Smarty `.tpl` templates from the legacy codebase (app now uses plain PHP templates)
+- Deleted 6 legacy scripts using deprecated `mysql_*` functions: `email-import.php`, `md5_fix.php`, `md5.php`, `gen_thumbs.php`, `fix_thumbs.php`, `regen_thumbs.php`
+
 ## 2026-02-17
 
 ### Changed

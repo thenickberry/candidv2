@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../bootstrap/app.php';
 
 $db = $container->database();
 $storage = $container->imageStorage();

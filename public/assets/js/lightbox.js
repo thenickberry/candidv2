@@ -238,7 +238,10 @@
     function formatDate(dateStr) {
         if (!dateStr) return '';
         try {
-            const date = new Date(dateStr + 'T00:00:00');
+            // PHP sends "YYYY-MM-DD HH:MM:SS" or "YYYY-MM-DD"; normalise to ISO 8601
+            const isoStr = dateStr.replace(' ', 'T');
+            const date = new Date(isoStr);
+            if (isNaN(date.getTime())) return dateStr;
             return date.toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'short',

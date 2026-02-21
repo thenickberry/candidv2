@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-require dirname(__DIR__) . '/bootstrap.php';
+require dirname(__DIR__) . '/bootstrap/app.php';
 
 echo "Backfilling MD5 hashes for existing images...\n\n";
 

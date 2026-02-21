@@ -9,7 +9,7 @@ declare(strict_types=1);
  */
 
 // Load bootstrap
-$container = require dirname(__DIR__) . '/bootstrap.php';
+$container = require dirname(__DIR__) . '/bootstrap/app.php';
 
 // Create router
 $router = new \App\Router($container);

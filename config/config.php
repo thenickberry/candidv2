@@ -54,7 +54,7 @@ return [
     'paths' => [
         'uploads' => $_ENV['UPLOAD_DIR'] ?? dirname(__DIR__) . '/storage/uploads',
         'images' => dirname(__DIR__) . '/storage/images',
-        'templates' => dirname(__DIR__) . '/templates',
+        'templates' => dirname(__DIR__) . '/resources',
         'cache' => dirname(__DIR__) . '/storage/cache',
     ],
 

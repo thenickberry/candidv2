@@ -9,7 +9,7 @@ declare(strict_types=1);
  */
 
 // Ensure we're running from the project root
-define('ROOT_PATH', __DIR__);
+define('ROOT_PATH', dirname(__DIR__));
 define('PUBLIC_PATH', ROOT_PATH . '/public');
 define('CONFIG_PATH', ROOT_PATH . '/config');
 define('STORAGE_PATH', ROOT_PATH . '/storage');

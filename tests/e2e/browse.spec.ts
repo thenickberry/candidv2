@@ -19,30 +19,22 @@ test.describe('Browse', () => {
   test('should navigate to category', async ({ page }) => {
     await page.goto('/browse');
 
-    // Click on first category link if available
+    // Seed data guarantees at least the "Root" category exists
     const categoryLink = page.locator('a[href^="/browse/"]').first();
-    const hasCategories = await categoryLink.count() > 0;
-
-    if (hasCategories) {
-      await categoryLink.click();
-      await expect(page).toHaveURL(/\/browse\/\d+/);
-    }
+    await expect(categoryLink).toBeVisible();
+    await categoryLink.click();
+    await expect(page).toHaveURL(/\/browse\/\d+/);
   });
 
   test('should show sort dropdown in category view', async ({ page }) => {
     await page.goto('/browse');
 
+    // Seed data guarantees at least the "Root" category exists
     const categoryLink = page.locator('a[href^="/browse/"]').first();
-    const hasCategories = await categoryLink.count() > 0;
-
-    if (hasCategories) {
-      await categoryLink.click();
-      // Use the page sort dropdown (not the search modal's)
-      const sortSelect = page.locator('select#sort');
-      if (await sortSelect.count() > 0) {
-        await expect(sortSelect).toBeVisible();
-      }
-    }
+    await expect(categoryLink).toBeVisible();
+    await categoryLink.click();
+    // Sort dropdown is present on category pages (even with no images)
+    await expect(page.locator('select#sort')).toBeVisible();
   });
 });
 

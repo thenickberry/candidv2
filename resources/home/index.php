@@ -24,9 +24,10 @@
                 </a>
                 <div class="caption">
                     <a href="/image/<?= h($image['id']) ?>"><?= h($image['descr']) ?></a>
-                    <?php if ($photographer): ?>
-                        <br><small>by <?= h($photographer) ?></small>
-                    <?php endif; ?>
+                    <div class="caption-meta">
+                        <small class="caption-left"><?= $photographer ? h($photographer) : '' ?></small>
+                        <small class="caption-right"><?= $image['date_taken'] ? format_date($image['date_taken']) : '' ?></small>
+                    </div>
                 </div>
             </div>
         <?php endforeach; ?>
