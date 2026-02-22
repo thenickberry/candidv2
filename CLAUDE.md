@@ -37,7 +37,7 @@ docker exec candidv2-app-1 vendor/bin/phpstan analyse
 npm install
 npx playwright install
 
-# Run all E2E tests (33 tests × 4 browsers = 132 total)
+# Run all E2E tests (40 tests × 4 browsers = 160 total)
 npx playwright test
 
 # Run specific browser only
@@ -95,3 +95,4 @@ Before considering any task complete, verify:
 3. **CHANGELOG.md updated** — Log the change with date and description
 4. **PHASES.md updated** — Mark tasks complete or add new features to the list
 5. **Test counts updated** — If tests were added, update counts in CLAUDE.md and PHASES.md
+6. **CI passes** — After pushing, confirm GitHub Actions passes: `gh run watch $(gh run list --limit 1 --json databaseId -q '.[0].databaseId')`
