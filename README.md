@@ -1,5 +1,7 @@
 # CANDIDv2
 
+[![Tests](https://github.com/thenickberry/candidv2/actions/workflows/tests.yml/badge.svg)](https://github.com/thenickberry/candidv2/actions/workflows/tests.yml)
+
 A PHP-based image management and cataloging system.
 
 ## Overview
