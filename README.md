@@ -1,6 +1,8 @@
 # CANDIDv2
 
 [![Tests](https://github.com/thenickberry/candidv2/actions/workflows/tests.yml/badge.svg)](https://github.com/thenickberry/candidv2/actions/workflows/tests.yml)
+[![PHP](https://img.shields.io/badge/php-8.3%2B-777bb4?logo=php&logoColor=white)](https://www.php.net/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 A PHP-based image management and cataloging system.
 
